@@ -1,0 +1,21 @@
+.login_form{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: calc(100vh - 56px);
+  form{
+    margin-bottom: 120px;
+    width: 400px;
+
+    >div:not(:last-child) {
+      margin-bottom: 20px;
+    }
+  }
+
+  .logo {
+    width: 200px;
+    margin-bottom: 40px;
+    margin-right: 18px;
+  }
+}
