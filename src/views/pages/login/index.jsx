@@ -1,17 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
-import { isLogin, loginUser } from '../../../reduxModules/user';
+import { isLogin, hasErrorUser, loginUser, setErrorLogin } from '../../../reduxModules/user';
 import RouterUrls from '../../../constants/routeUrls';
+import app, { auth } from '../../../utils/firebase';
 
 import './login.scss';
 import logo from '../../../assets/logo.png'; 
+import isEmpty from '../../../utils/isEmpty';
 
 const Login = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(isLogin);
+  const hasErrorInLogin = useSelector(hasErrorUser);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -20,22 +24,39 @@ const Login = () => {
   }, [isAuthenticated]);
 
   const submitLogin = (e) => {
-    dispatch(loginUser());
+
+    const email = e?.target?.email?.value;
+    const password = e?.target?.password?.value;
+
+    if (!isEmpty(email) && !isEmpty(password)){
+      signInWithEmailAndPassword(auth, email, password).then((response) => {
+        dispatch(loginUser(response));
+      }).catch((e) => {
+        dispatch(setErrorLogin());
+        console.error(e.message);
+      });
+    } else {
+      dispatch(setErrorLogin());
+    }
+    
     e.preventDefault();
   };
+
+  
   return (
     <div className='login_form'>
       <img src={logo} className="logo"/>
 
       <form onSubmit={submitLogin}>
         
+        {hasErrorInLogin && <span>something went wrong</span>}
         <div>
-          <input type="text" className="form-control" placeholder="Email" aria-label="Email" aria-describedby="addon-wrapping"/>
+          <input name='email' type="text" className="form-control" placeholder="Email" aria-label="Email" aria-describedby="addon-wrapping" />
         </div>
 
         
         <div>
-          <input type="password" className="form-control" placeholder="Password" aria-label="PasswordPassword" aria-describedby="addon-wrapping" />
+          <input name='password' type="password" className="form-control" placeholder="Password" aria-label="PasswordPassword" aria-describedby="addon-wrapping"/>
         </div>
 
       

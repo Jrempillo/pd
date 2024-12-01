@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.scss'
 import 'normalize.css'
 import App from './views/root/AppRoot'
+import './utils/firebase';
 
 import 'bootstrap/dist/js/bootstrap.js';
 

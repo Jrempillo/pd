@@ -4,11 +4,12 @@ import userReducer from './user.reducer';
 
 import isEmpty from '../../utils/isEmpty';
 
-import { LOCAL_STORAGE_USER_INFORMATION } from '../../constants/storage';
+import { ACCESS_TOKEN, USER_INFORMATION} from '../../constants/storage';
 
 const initialState = {
-  isLogin: !isEmpty(localStorage.getItem(LOCAL_STORAGE_USER_INFORMATION)),
-  currentUser: !isEmpty(localStorage.getItem(LOCAL_STORAGE_USER_INFORMATION)) ? JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_INFORMATION)) : {},
+  isLogin: !isEmpty(localStorage.getItem(ACCESS_TOKEN)) && !isEmpty(localStorage.getItem(USER_INFORMATION)),
+  currentUser: !isEmpty(localStorage.getItem(USER_INFORMATION)) ? JSON.parse(localStorage.getItem(USER_INFORMATION)) : {},
+  hasError: false
 };
 
 export const userSlice = createSlice({
@@ -17,8 +18,9 @@ export const userSlice = createSlice({
   reducers: userReducer,
 });
 
-export const { loginUser, logoutUser } = userSlice.actions;
+export const { loginUser, logoutUser, setErrorLogin } = userSlice.actions;
 export const isLogin = (state) => state.user.isLogin;
 export const currentUser = (state) => state.user.currentUser;
+export const hasErrorUser = (state) => state.user.hasError;
 
 export default userSlice.reducer;

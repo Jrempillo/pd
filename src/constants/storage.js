@@ -1,1 +1,2 @@
-export const LOCAL_STORAGE_USER_INFORMATION = 'user_information';
+export const ACCESS_TOKEN = 'access_token';
+export const USER_INFORMATION = 'user_information';

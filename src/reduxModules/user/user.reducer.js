@@ -1,17 +1,26 @@
-import { LOCAL_STORAGE_USER_INFORMATION } from '../../constants/storage';
+import { ACCESS_TOKEN, USER_INFORMATION } from '../../constants/storage';
+import isEmpty from '../../utils/isEmpty';
 
 const userReducer = {
   loginUser: (state, action) => {
-    
-    const user = { name: 'Jo' }
-    state.isLogin = true;
-    state.currentUser = user;
-    localStorage.setItem(LOCAL_STORAGE_USER_INFORMATION, JSON.stringify(user));
+    if (!isEmpty(action?.payload?.user)){
+      state.hasError = false;
+      state.isLogin = true;
+      state.currentUser = action?.payload?.user?.providerData?.[0];
+      localStorage.setItem(ACCESS_TOKEN, action?.payload?.user?.accessToken);
+      localStorage.setItem(USER_INFORMATION, JSON.stringify(action?.payload?.user?.providerData?.[0]));
+    } else {
+      state.hasError = true;
+    }
   },
   logoutUser: (state) => {
     state.isLogin = false;
     state.currentUser = { };
-    localStorage.removeItem(LOCAL_STORAGE_USER_INFORMATION);
+    localStorage.removeItem(ACCESS_TOKEN);
+    localStorage.removeItem(USER_INFORMATION);
+  },
+  setErrorLogin: (state) => {
+    state.hasError = true;
   },
 };
 
