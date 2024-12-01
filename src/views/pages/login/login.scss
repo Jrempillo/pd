@@ -1,4 +1,7 @@
 .login_form{
+  background:linear-gradient(rgba(0, 0, 0, 0.7),
+      rgba(0, 0, 0, 0.7)), url('../../../assets/background.jpg') no-repeat center center;
+  background-size: cover;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,8 +17,20 @@
   }
 
   .logo {
+    
     width: 200px;
     margin-bottom: 40px;
     margin-right: 18px;
+    margin-top: 40px;
   }
+.login_footer {
+  text-align: center;
+  margin-top: auto;
+  color: white;
+  font-size: 12px;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 10px;
+ 
 }
+}
+

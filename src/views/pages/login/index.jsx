@@ -44,12 +44,19 @@ const Login = () => {
 
   
   return (
+    
+    
     <div className='login_form'>
       <img src={logo} className="logo"/>
 
       <form onSubmit={submitLogin}>
         
-        {hasErrorInLogin && <span>something went wrong</span>}
+        {hasErrorInLogin && <div class="alert alert-danger" role="alert">
+          <h4 class="alert-heading">Oops!</h4>
+          <p> Something is wrong.</p>
+          <hr></hr>
+            <p class="mb-0">Check your Email or Password.</p>
+        </div>}
         <div>
           <input name='email' type="text" className="form-control" placeholder="Email" aria-label="Email" aria-describedby="addon-wrapping" />
         </div>
@@ -67,8 +74,14 @@ const Login = () => {
         
      
       </form>
+      <footer className="login_footer">
+        <p>&copy; {new Date().getFullYear()} Technological Institute of the Philippines. All rights reserved.</p>
+      </footer>  
     </div>
+
+    
   );
+  
 };
 
 export default Login;
