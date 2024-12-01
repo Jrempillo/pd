@@ -21,6 +21,8 @@ const Header = () => {
       <nav className="header navbar navbar-expand-lg bg-primary">
         <div className="container-fluid">
           <img src={logo} className="logo" />
+
+          
           {
             isAuthenticated && !isEmpty(userInformation) && (
               <>
