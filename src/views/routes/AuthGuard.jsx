@@ -12,7 +12,9 @@ function AuthGuard({ children }) {
   return !isAuthenticated ? (
     <Navigate to={RouterUrls?.login} />
   ) : (
-    children
+    <div style={{ padding: '20px 15px 0', minHeight: 'calc(100vh - 56px - 40px)'}}>
+      {children}
+    </div>
   );
 }
 

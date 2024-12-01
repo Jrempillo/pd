@@ -5,6 +5,7 @@ import PrivateRoutes from './PrivateRoutes';
 import PublicRoutes from './PublicRoutes';
 
 import Header from '../layout/Header';
+import Footer from '../layout/Footer';
 
 function Routes() {
   const AllRoutes = () => useRoutes([...PublicRoutes, ...PrivateRoutes]);
@@ -14,6 +15,7 @@ function Routes() {
       <Router>
         <Header />
         <AllRoutes />
+        <Footer />
       </Router>
     </Suspense>
   );
