@@ -107,7 +107,6 @@ const Dashboard = () => {
           options,
         });
         
-        options.plugins.title.text = `pH Level (${moment(sugarData?.[0]?.timestamp).format('LL')})`;
 
         setSugarPHChart({
           ...sugarTemperatureChart,
@@ -123,7 +122,16 @@ const Dashboard = () => {
               },
             ],
           },
-          options,
+          options: {
+            ...options,
+            plugins: {
+              ...options?.plugins,
+              title: {
+                display: true,
+                text: `pH Level (${moment(sugarData?.[0]?.timestamp).format('LL')})`
+              }
+            }
+          },
         });
       }
       
@@ -175,7 +183,7 @@ const Dashboard = () => {
           <div className='temperature'>
           {!isEmpty(sugarData) && !isEmpty(sugarTemperatureChart?.data) && (
               <>
-              {!isEmpty(sugarData) && sugarData?.length > 0 && <h4>{sugarData?.[sugarData?.length - 1].temperature}°C<p class="fs-6 fst-italic">current temperature</p></h4>}
+              {!isEmpty(sugarData) && sugarData?.length > 0 && <h4>{sugarData?.[sugarData?.length - 1].temperature}°C<p class="fs-6 fst-italic fw-bold fs-3">Temperature</p></h4>}
                 <Line height="50" data={sugarTemperatureChart?.data} options={sugarTemperatureChart?.options} />
               </>
             )}
@@ -183,7 +191,7 @@ const Dashboard = () => {
           <div className='ph'>
           {!isEmpty(sugarData) && !isEmpty(sugarPHChart?.data) && (
               <>
-              {!isEmpty(sugarData) && sugarData?.length > 0 && <h4>{sugarData?.[sugarData?.length - 1].ph} pH<p class="fs-6 fst-italic">current pH Level</p></h4>}
+              {!isEmpty(sugarData) && sugarData?.length > 0 && <h4>{sugarData?.[sugarData?.length - 1].ph} pH<p class="fs-6 fst-italic fw-bold fs-3">pH Level</p></h4>}
                 <Line height="50" data={sugarPHChart?.data} options={sugarPHChart?.options} />
               </>
             )}
