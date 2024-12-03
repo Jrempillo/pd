@@ -7,7 +7,7 @@ const Footer = () => {
 
   return (
     <div className='footer_container'>
-      All rights reserved © 2024
+      &copy; {new Date().getFullYear()} Technological Institute of the Philippines. All rights reserved.
     </div>
   );
 };

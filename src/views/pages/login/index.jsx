@@ -74,9 +74,6 @@ const Login = () => {
         
      
       </form>
-      <footer className="login_footer">
-        <p>&copy; {new Date().getFullYear()} Technological Institute of the Philippines. All rights reserved.</p>
-      </footer>  
     </div>
 
     
