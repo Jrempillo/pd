@@ -51,10 +51,10 @@ const intialChartOptions = {
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  
+
   const sugarData = useSelector(sugar);
 
-  const [title, setTitle] = useState('Sugar');
+  const [title, setTitle] = useState('Vinegar');
 
   /** SUGAR **/
   const [sugarRunning, setSugarRunning] = useState(false);
@@ -78,7 +78,7 @@ const Dashboard = () => {
         return i;
       }, []);
 
-      if (!isEmpty(labels)){
+      if (!isEmpty(labels)) {
         let options = {
           ...sugarTemperatureChart?.options,
           plugins: {
@@ -106,7 +106,7 @@ const Dashboard = () => {
           },
           options,
         });
-        
+
 
         setSugarPHChart({
           ...sugarTemperatureChart,
@@ -127,75 +127,77 @@ const Dashboard = () => {
             plugins: {
               ...options?.plugins,
               title: {
-                display: true,
+
                 text: `pH Level (${moment(sugarData?.[0]?.timestamp).format('LL')})`
               }
             }
           },
         });
       }
-      
+
     }
-    
+
   }, [sugarData]);
 
   const runSugar = (sugarRunning) => {
-    if (sugarRunning){
+    if (sugarRunning) {
       setSugarRunning(false);
     } else {
       setSugarRunning(true);
       dispatch(resetSugarData());
       dispatch(addSugarData({
         timestamp: moment().format('YYYY-MM-DD HH:mm:ss'),
-        temperature: faker.number.int({ min: 10, max: 50 }),
-        ph: faker.number.int({ min: 5, max: 7 })
+        //subject  to change
+        temperature: faker.number.int({ min: 28, max: 32 }),
+        ph: parseFloat(faker.number.float({ min: 8.67, max: 8.71 }).toFixed(2))
       }));
     }
   }
 
   useEffect(() => {
     let interval;
-    if (sugarRunning){
+    if (sugarRunning) {
       interval = setInterval(() => {
         dispatch(addSugarData({
           timestamp: moment().format('YYYY-MM-DD HH:mm:ss'),
-          temperature: faker.number.int({ min: 10, max: 50 }),
-          ph: faker.number.int({ min: 5, max: 7 })
+          //subject to change
+          temperature: faker.number.int({ min: 27, max: 30 }),
+          ph: parseFloat(faker.number.float({ min: 8.02, max: 8.80 }).toFixed(2))
         }));
       }, 3000);
 
     } else if (interval) {
       clearInterval(interval)
     }
-    
+
     return () => clearInterval(interval);
   }, [sugarRunning]);
 
-  
+
   return (
     <div className='dashboard_container'>
       <div className='title_container'>
         <h3>{title}</h3>
         <button type="button" class="btn btn-primary" onClick={() => runSugar(sugarRunning)}>{sugarRunning ? 'Stop' : 'Run'}</button>
       </div>
-      
+
       <div className='data_container'>
-          <div className='temperature'>
+        <div className='temperature'>
           {!isEmpty(sugarData) && !isEmpty(sugarTemperatureChart?.data) && (
-              <>
+            <>
               {!isEmpty(sugarData) && sugarData?.length > 0 && <h4>{sugarData?.[sugarData?.length - 1].temperature}°C<p class="fs-6 fst-italic fw-bold fs-3">Temperature</p></h4>}
-                <Line height="50" data={sugarTemperatureChart?.data} options={sugarTemperatureChart?.options} />
-              </>
-            )}
-          </div>
-          <div className='ph'>
+              <Line height="50" data={sugarTemperatureChart?.data} options={sugarTemperatureChart?.options} />
+            </>
+          )}
+        </div>
+        <div className='ph'>
           {!isEmpty(sugarData) && !isEmpty(sugarPHChart?.data) && (
-              <>
+            <>
               {!isEmpty(sugarData) && sugarData?.length > 0 && <h4>{sugarData?.[sugarData?.length - 1].ph} pH<p class="fs-6 fst-italic fw-bold fs-3">pH Level</p></h4>}
-                <Line height="50" data={sugarPHChart?.data} options={sugarPHChart?.options} />
-              </>
-            )}
-          </div>
+              <Line height="50" data={sugarPHChart?.data} options={sugarPHChart?.options} />
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

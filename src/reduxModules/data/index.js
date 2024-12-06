@@ -2,12 +2,11 @@ import { createSlice } from '@reduxjs/toolkit';
 import dataReducer from './data.reducer';
 
 const initialState = {
-  sugar: [
-    {
-      timestamp: '2024-12-01 09:30:00',
-      temperature: 20,
-      ph: 7
-    },
+  sugar: [{
+    timestamp: '2024-12-01 09:30:00',
+    temperature: 20,
+    ph: 7
+  },
     {
       timestamp: '2024-12-01 09:30:05',
       temperature: 21,
@@ -52,9 +51,7 @@ const initialState = {
       timestamp: '2024-12-01 09:30:45',
       temperature: 20,
       ph: 7
-    },
-    
-  ],
+    }],
   vinegar: [],
   wine: []
 };
@@ -66,6 +63,8 @@ export const dataSlice = createSlice({
 });
 
 export const { addSugarData, resetSugarData } = dataSlice.actions;
+export const { addWineData, resetWineData } = dataSlice.actions;
+export const { addVinegerData, resetVinegerData } = dataSlice.actions;
 export const sugar = (state) => state.data.sugar;
 export const vinegar = (state) => state.data.vinegar;
 export const wine = (state) => state.data.wine;
