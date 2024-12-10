@@ -216,11 +216,7 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-<<<<<<< HEAD
-"@eslint/js@^9.15.0", "@eslint/js@9.15.0":
-=======
 "@eslint/js@9.15.0", "@eslint/js@^9.15.0":
->>>>>>> 60713e9710c073ac5ff902fc33823b45f58cc122
   version "9.15.0"
   resolved "https://registry.npmjs.org/@eslint/js/-/js-9.15.0.tgz"
   integrity sha512-tMTqrY+EzbXmKJR5ToI8lxu7jaN5EdmrBFJpQk5JmSlyLsx6o4t27r883K5xsLuCYCpfKBCGswMSWXsM+jB7lg==
@@ -848,8 +844,6 @@
     uncontrollable "^8.0.4"
     warning "^4.0.3"
 
-<<<<<<< HEAD
-=======
 "@rollup/rollup-android-arm-eabi@4.27.4":
   version "4.27.4"
   resolved "https://registry.yarnpkg.com/@rollup/rollup-android-arm-eabi/-/rollup-android-arm-eabi-4.27.4.tgz#e3c9cc13f144ba033df4d2c3130a214dc8e3473e"
@@ -935,7 +929,6 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-ia32-msvc/-/rollup-win32-ia32-msvc-4.27.4.tgz#3457a3f44a84f51d8097c3606429e01f0d2d0ec2"
   integrity sha512-KtwEJOaHAVJlxV92rNYiG9JQwQAdhBlrjNRp7P9L8Cb4Rer3in+0A+IPhJC9y68WAi9H0sX4AiG2NTsVlmqJeQ==
 
->>>>>>> 60713e9710c073ac5ff902fc33823b45f58cc122
 "@rollup/rollup-win32-x64-msvc@4.27.4":
   version "4.27.4"
   resolved "https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.27.4.tgz"
@@ -1236,11 +1229,7 @@ chalk@^4.0.0:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
-<<<<<<< HEAD
-chart.js@^4.1.1, chart.js@^4.4.7:
-=======
 chart.js@^4.4.7:
->>>>>>> 60713e9710c073ac5ff902fc33823b45f58cc122
   version "4.4.7"
   resolved "https://registry.npmjs.org/chart.js/-/chart.js-4.4.7.tgz"
   integrity sha512-pwkcKfdzTMAU/+jNosKhNL2bHtJc/sSmYgVbuGTEDhzkrhmyihmP7vUc/5ZK9WopidMDHNe3Wm7jOd/WhuHWuw==
@@ -1610,11 +1599,7 @@ eslint-visitor-keys@^4.2.0:
   resolved "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-4.2.0.tgz"
   integrity sha512-UyLnSehNt62FFhSwjZlHmeokpRK59rcz29j+F1/aDgbkbRTk7wIc9XzdoasMUbRNKDM0qQt/+BJ4BrpFeABemw==
 
-<<<<<<< HEAD
-"eslint@^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7", "eslint@^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0", "eslint@^6.0.0 || ^7.0.0 || >=8.0.0", eslint@^9.15.0, eslint@>=7:
-=======
 eslint@^9.15.0:
->>>>>>> 60713e9710c073ac5ff902fc33823b45f58cc122
   version "9.15.0"
   resolved "https://registry.npmjs.org/eslint/-/eslint-9.15.0.tgz"
   integrity sha512-7CrWySmIibCgT1Os28lUU6upBshZ+GxybLOrmRzi08kS8MBuO8QA7pXEgYgY5W8vK3e74xv0lpjo9DbaGU9Rkw==
