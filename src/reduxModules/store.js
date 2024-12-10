@@ -8,4 +8,7 @@ export default configureStore({
     user,
     data,
   },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+    serializableCheck: false,
+  }),
 });

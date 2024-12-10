@@ -10,6 +10,24 @@ const dataReducer = {
   resetSugarData: (state) => {
     state.sugar = [];
   },
+
+  addVinegarData: (state, action) => {
+    if (!isEmpty(action?.payload)){
+      state.vinegar = [...state.vinegar, action?.payload];
+    }
+  },
+  resetVinegarData: (state) => {
+    state.vinegar = [];
+  },
+
+  addWineData: (state, action) => {
+    if (!isEmpty(action?.payload)){
+      state.wine = [...state.wine, action?.payload];
+    }
+  },
+  resetWineData: (state) => {
+    state.wine = [];
+  },
   
 };
 

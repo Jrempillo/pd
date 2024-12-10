@@ -1,37 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'; 
 import moment from 'moment';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { Line } from "react-chartjs-2";
-import { faker } from '@faker-js/faker';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { sugar, addSugarData, resetSugarData } from '../../../reduxModules/data';
+import { sugar, addSugarData, resetSugarData, vinegar, addVinegarData, resetVinegarData, wine, addWineData, resetWineData } from '../../../reduxModules/data';
+import { VINEGAR, SUGAR, WINE } from '../../../constants/productType'; 
+import { getDatabase, ref, onValue, off } from 'firebase/database';
+import Dropdown from 'react-bootstrap/Dropdown';
 
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
-
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 import './dashboard.scss';
 import isEmpty from '../../../utils/isEmpty';
 
-const intialChartOptions = {
+const initialChartOptions = {
   responsive: true,
   plugins: {
     legend: {
@@ -44,61 +27,120 @@ const intialChartOptions = {
   layout: {
     padding: {
       left: 50,
-      right: 100
-    }
-  }
-}
+      right: 100,
+    },
+  },
+};
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-
   const sugarData = useSelector(sugar);
+  const vinegarData = useSelector(vinegar);
+  const wineData = useSelector(wine);
 
-  const [title, setTitle] = useState('Vinegar');
+  const [limit, setLimit] = useState(20);
 
-  /** SUGAR **/
-  const [sugarRunning, setSugarRunning] = useState(false);
-
-  const [sugarTemperatureChart, setSugarTemperatureChart] = useState({
+  const [temperatureChart, setTemperatureChart] = useState({
     data: {},
-    options: intialChartOptions,
-    plugins: []
+    options: initialChartOptions,
+    plugins: [],
   });
 
-  const [sugarPHChart, setSugarPHChart] = useState({
+  const [PHChart, setPHChart] = useState({
     data: {},
-    options: intialChartOptions,
-    plugins: []
+    options: initialChartOptions,
+    plugins: [],
+  });
+
+  const [firebaseData, setFirebaseData] = useState({
+    temperature: null,
+    ph: null,
+    type: null,
   });
 
   useEffect(() => {
-    if (!isEmpty(sugarData)) {
-      const labels = sugarData.reduce((i, v) => {
+    const dbRef = ref(getDatabase(), '/ProtoReadings'); 
+    onValue(dbRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setFirebaseData({
+          temperature: data.Temperature,
+          ph: data.pH,
+          type: data.Type,
+        });
+      }
+    });
+    return () => {
+      off(dbRef); 
+    };
+  }, []); 
+  useEffect(() => {
+    dispatch(resetSugarData());
+    dispatch(resetVinegarData());
+    dispatch(resetWineData());
+  }, [firebaseData?.type]); 
+
+  useEffect(() => {
+    let interval = setInterval(() => {
+      if (!isEmpty(firebaseData?.temperature) && !isEmpty(firebaseData?.ph)){
+        const data = {
+          timestamp: moment().format('YYYY-MM-DD HH:mm:ss'),
+          temperature: firebaseData?.temperature,
+          ph: firebaseData?.ph,
+        }
+        if (firebaseData?.type?.toLowerCase() === SUGAR){
+          dispatch(addSugarData(data));
+        } else if (firebaseData?.type?.toLowerCase() === VINEGAR){
+          dispatch(addVinegarData(data));
+        } else if (firebaseData?.type?.toLowerCase() === WINE) {
+          dispatch(addWineData(data));
+        }
+        
+      }
+    }, 500); 
+
+    return () => clearInterval(interval); 
+  }, [dispatch, firebaseData]); 
+
+  useEffect(() => {
+    
+    let data = [];
+
+    if(firebaseData?.type?.toLowerCase() === SUGAR){
+      data = sugarData;
+    } else if (firebaseData?.type?.toLowerCase() === VINEGAR) {
+      data = vinegarData;
+    } else if (firebaseData?.type?.toLowerCase() === WINE) {
+      data = wineData;
+    }
+    
+    data = data.slice((limit * -1)) // limit to 20 data
+    
+    if (!isEmpty(data)) {
+      const labels = data.reduce((i, v) => {
         i.push(moment(v.timestamp)?.format('LTS'));
         return i;
       }, []);
-
       if (!isEmpty(labels)) {
         let options = {
-          ...sugarTemperatureChart?.options,
+          ...temperatureChart?.options,
           plugins: {
-            ...sugarTemperatureChart?.options?.plugins,
+            ...temperatureChart?.options?.plugins,
             title: {
               display: true,
-              text: `Temperature in °C (${moment(sugarData?.[0]?.timestamp).format('LL')})`,
+              text: `Temperature in °C (${moment(data?.[0]?.timestamp).format('LL')})`,
             },
-          }
+          },
         };
 
-        setSugarTemperatureChart({
-          ...sugarTemperatureChart,
+        setTemperatureChart({
+          ...temperatureChart,
           data: {
             labels,
             datasets: [
               {
                 label: 'Temperature in °C',
-                data: sugarData?.map((s) => s?.temperature),
-                // data: labels?.map(() => faker.number.int({ min: 10, max: 50 })),
+                data: data?.map((s) => s?.temperature),
                 borderColor: '#c0392b',
                 backgroundColor: '#e74c3c',
               },
@@ -107,16 +149,14 @@ const Dashboard = () => {
           options,
         });
 
-
-        setSugarPHChart({
-          ...sugarTemperatureChart,
+        setPHChart({
+          ...PHChart,
           data: {
             labels,
             datasets: [
               {
                 label: 'pH Level',
-                data: sugarData?.map((s) => s?.ph),
-                // data: labels?.map(() => faker.number.int({ min: 10, max: 50 })),
+                data: data?.map((s) => s?.ph),
                 borderColor: '#2980b9',
                 backgroundColor: '#3498db',
               },
@@ -127,74 +167,56 @@ const Dashboard = () => {
             plugins: {
               ...options?.plugins,
               title: {
-
-                text: `pH Level (${moment(sugarData?.[0]?.timestamp).format('LL')})`
-              }
-            }
+                text: `pH Level (${moment(data?.[0]?.timestamp).format('LL')})`,
+              },
+            },
           },
         });
       }
-
     }
-
-  }, [sugarData]);
-
-  const runSugar = (sugarRunning) => {
-    if (sugarRunning) {
-      setSugarRunning(false);
-    } else {
-      setSugarRunning(true);
-      dispatch(resetSugarData());
-      dispatch(addSugarData({
-        timestamp: moment().format('YYYY-MM-DD HH:mm:ss'),
-        //subject  to change
-        temperature: faker.number.int({ min: 28, max: 32 }),
-        ph: parseFloat(faker.number.float({ min: 8.67, max: 8.71 }).toFixed(2))
-      }));
-    }
-  }
-
-  useEffect(() => {
-    let interval;
-    if (sugarRunning) {
-      interval = setInterval(() => {
-        dispatch(addSugarData({
-          timestamp: moment().format('YYYY-MM-DD HH:mm:ss'),
-          //subject to change
-          temperature: faker.number.int({ min: 27, max: 30 }),
-          ph: parseFloat(faker.number.float({ min: 8.02, max: 8.80 }).toFixed(2))
-        }));
-      }, 3000);
-
-    } else if (interval) {
-      clearInterval(interval)
-    }
-
-    return () => clearInterval(interval);
-  }, [sugarRunning]);
-
-
+  }, [sugarData, vinegarData, wineData]); 
+  
   return (
     <div className='dashboard_container'>
       <div className='title_container'>
-        <h3>{title}</h3>
-        <button type="button" class="btn btn-primary" onClick={() => runSugar(sugarRunning)}>{sugarRunning ? 'Stop' : 'Run'}</button>
+        <h3>{firebaseData?.type}</h3>
+        <Dropdown>
+          <Dropdown.Toggle variant="success" id="dropdown-basic">
+            Limit: {limit}
+          </Dropdown.Toggle>
+
+          <Dropdown.Menu>
+            <Dropdown.Item onClick={()=>setLimit(10)}>10</Dropdown.Item>
+            <Dropdown.Item onClick={()=>setLimit(20)}>20</Dropdown.Item>
+            <Dropdown.Item onClick={()=>setLimit(30)}>30</Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
       </div>
 
       <div className='data_container'>
         <div className='temperature'>
-          {!isEmpty(sugarData) && !isEmpty(sugarTemperatureChart?.data) && (
+          {!isEmpty(temperatureChart?.data) && (
             <>
-              {!isEmpty(sugarData) && sugarData?.length > 0 && <h4>{sugarData?.[sugarData?.length - 1].temperature}°C<p class="fs-6 fst-italic fw-bold fs-3">Temperature</p></h4>}
-              <Line height="50" data={sugarTemperatureChart?.data} options={sugarTemperatureChart?.options} />
+              {!isEmpty(firebaseData?.temperature) && (
+                <h4>
+                  {firebaseData?.temperature}°C
+                  <p className="fs-6 fst-italic fw-bold fs-3">Temperature</p>
+                </h4>
+              )}
+              <Line height="50" data={temperatureChart?.data} options={temperatureChart?.options} />
             </>
           )}
         </div>
         <div className='ph'>
-          {!isEmpty(sugarData) && !isEmpty(sugarPHChart?.data) && (
+          {!isEmpty(PHChart?.data) && (
             <>
-              {!isEmpty(sugarData) && sugarData?.length > 0 && <h4>{sugarData?.[sugarData?.length - 1].ph} pH<p class="fs-6 fst-italic fw-bold fs-3">pH Level</p></h4>}
-              <Line height="50" data={sugarPHChart?.data} options={sugarPHChart?.options} />
+              {!isEmpty(firebaseData?.ph) && (
+                <h4>
+                  {firebaseData?.ph} pH
+                  <p className="fs-6 fst-italic fw-bold fs-3">pH Level</p>
+                </h4>
+              )}
+              <Line height="50" data={PHChart?.data} options={PHChart?.options} />
             </>
           )}
         </div>
