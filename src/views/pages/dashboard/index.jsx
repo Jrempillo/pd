@@ -1,37 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'; 
 import moment from 'moment';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { Line } from "react-chartjs-2";
-import { faker } from '@faker-js/faker';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { sugar, addSugarData, resetSugarData } from '../../../reduxModules/data';
+import { sugar, addSugarData } from '../../../reduxModules/data';
+import { getDatabase, ref, onValue, off } from 'firebase/database';
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";  // Import Firebase Authentication
 
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
-
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 import './dashboard.scss';
 import isEmpty from '../../../utils/isEmpty';
 
-const intialChartOptions = {
+const initialChartOptions = {
   responsive: true,
   plugins: {
     legend: {
@@ -44,32 +26,109 @@ const intialChartOptions = {
   layout: {
     padding: {
       left: 50,
-      right: 100
-    }
-  }
-}
+      right: 100,
+    },
+  },
+};
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-
+  
   const sugarData = useSelector(sugar);
 
-  const [title, setTitle] = useState('Vinegar');
+  const [title, setTitle] = useState('Sugar');
 
   /** SUGAR **/
   const [sugarRunning, setSugarRunning] = useState(false);
 
   const [sugarTemperatureChart, setSugarTemperatureChart] = useState({
     data: {},
-    options: intialChartOptions,
-    plugins: []
+    options: initialChartOptions,
+    plugins: [],
   });
 
   const [sugarPHChart, setSugarPHChart] = useState({
     data: {},
-    options: intialChartOptions,
-    plugins: []
+    options: initialChartOptions,
+    plugins: [],
   });
+
+  // New state for Firebase data
+  const [firebaseData, setFirebaseData] = useState({
+    temperature: null,
+    ph: null,
+    type: null,
+  });
+
+  const [authError, setAuthError] = useState(null);  // State to store any authentication error
+
+  // Firebase Authentication: Sign in with email and password
+  useEffect(() => {
+    const auth = getAuth();
+    
+    const email = "jo23mar112300@gmail.com";
+    const password = "demo123";
+
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Successfully signed in
+        const user = userCredential.user;
+        console.log("User signed in:", user);
+      })
+      .catch((error) => {
+        // Handle authentication error
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error("Error signing in:", errorCode, errorMessage);
+        setAuthError(errorMessage);  // Store error message in state
+      });
+  }, []);  // Empty dependency array, so it runs only once when the component mounts
+
+  // Fetch data from Firebase Realtime Database
+  useEffect(() => {
+    const dbRef = ref(getDatabase(), '/ProtoReadings'); // Reference to the /ProtoReadings path in the database
+    onValue(dbRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setFirebaseData({
+          temperature: data.Temperature,
+          ph: data.pH,
+          type: data.Type,
+        });
+
+        // Update the state based on the fetched data
+        setTemperature(data.Temperature);
+        setPhLevel(data.pH);
+        setProductMode(data.Type);
+        setTitle(data.Type); // Update the title based on the Type
+      }
+    });
+
+    // Cleanup the listener when the component is unmounted
+    return () => {
+      off(dbRef); // Correct way to detach the listener in Firebase v9+
+    };
+  }, []);  // This will only run once when the component mounts
+
+  useEffect(() => {
+    // Dispatch the initial data when the component mounts with Firebase values for temperature and pH
+    dispatch(addSugarData({
+      timestamp: moment().format('YYYY-MM-DD HH:mm:ss'),
+      temperature: temperature,
+      ph: phLevel,
+    }));
+
+    let interval = setInterval(() => {
+      // Update the temperature and pH levels at regular intervals
+      dispatch(addSugarData({
+        timestamp: moment().format('YYYY-MM-DD HH:mm:ss'),
+        temperature: temperature,
+        ph: phLevel,
+      }));
+    }, 500); // Update every 0.5 seconds
+
+    return () => clearInterval(interval); // Cleanup interval on component unmount
+  }, [dispatch, temperature, phLevel]);  // Rerun when temperature or phLevel changes
 
   useEffect(() => {
     if (!isEmpty(sugarData)) {
@@ -85,9 +144,9 @@ const Dashboard = () => {
             ...sugarTemperatureChart?.options?.plugins,
             title: {
               display: true,
-              text: `Temperature in °C (${moment(sugarData?.[0]?.timestamp).format('LL')})`,
+              text: `Temperature in °C (${moment(sugarData?.[0]?.timestamp).format('LL')}) - ${productMode}`,
             },
-          }
+          },
         };
 
         setSugarTemperatureChart({
@@ -98,7 +157,6 @@ const Dashboard = () => {
               {
                 label: 'Temperature in °C',
                 data: sugarData?.map((s) => s?.temperature),
-                // data: labels?.map(() => faker.number.int({ min: 10, max: 50 })),
                 borderColor: '#c0392b',
                 backgroundColor: '#e74c3c',
               },
@@ -106,17 +164,16 @@ const Dashboard = () => {
           },
           options,
         });
-
+        
 
         setSugarPHChart({
-          ...sugarTemperatureChart,
+          ...sugarPHChart,
           data: {
             labels,
             datasets: [
               {
                 label: 'pH Level',
                 data: sugarData?.map((s) => s?.ph),
-                // data: labels?.map(() => faker.number.int({ min: 10, max: 50 })),
                 borderColor: '#2980b9',
                 backgroundColor: '#3498db',
               },
@@ -127,77 +184,74 @@ const Dashboard = () => {
             plugins: {
               ...options?.plugins,
               title: {
-
+                display: true,
                 text: `pH Level (${moment(sugarData?.[0]?.timestamp).format('LL')})`
               }
             }
           },
         });
       }
-
+      
     }
-
+    
   }, [sugarData]);
 
   const runSugar = (sugarRunning) => {
-    if (sugarRunning) {
+    if (sugarRunning){
       setSugarRunning(false);
     } else {
       setSugarRunning(true);
       dispatch(resetSugarData());
       dispatch(addSugarData({
         timestamp: moment().format('YYYY-MM-DD HH:mm:ss'),
-        //subject  to change
-        temperature: faker.number.int({ min: 28, max: 32 }),
-        ph: parseFloat(faker.number.float({ min: 8.67, max: 8.71 }).toFixed(2))
+        temperature: faker.number.int({ min: 10, max: 50 }),
+        ph: faker.number.int({ min: 5, max: 7 })
       }));
     }
   }
 
   useEffect(() => {
     let interval;
-    if (sugarRunning) {
+    if (sugarRunning){
       interval = setInterval(() => {
         dispatch(addSugarData({
           timestamp: moment().format('YYYY-MM-DD HH:mm:ss'),
-          //subject to change
-          temperature: faker.number.int({ min: 27, max: 30 }),
-          ph: parseFloat(faker.number.float({ min: 8.02, max: 8.80 }).toFixed(2))
+          temperature: faker.number.int({ min: 10, max: 50 }),
+          ph: faker.number.int({ min: 5, max: 7 })
         }));
       }, 3000);
 
     } else if (interval) {
       clearInterval(interval)
     }
-
+    
     return () => clearInterval(interval);
   }, [sugarRunning]);
 
-
+  
   return (
     <div className='dashboard_container'>
       <div className='title_container'>
         <h3>{title}</h3>
-        <button type="button" class="btn btn-primary" onClick={() => runSugar(sugarRunning)}>{sugarRunning ? 'Stop' : 'Run'}</button>
       </div>
-
+      
       <div className='data_container'>
         <div className='temperature'>
           {!isEmpty(sugarData) && !isEmpty(sugarTemperatureChart?.data) && (
-            <>
+              <>
               {!isEmpty(sugarData) && sugarData?.length > 0 && <h4>{sugarData?.[sugarData?.length - 1].temperature}°C<p class="fs-6 fst-italic fw-bold fs-3">Temperature</p></h4>}
-              <Line height="50" data={sugarTemperatureChart?.data} options={sugarTemperatureChart?.options} />
-            </>
-          )}
-        </div>
-        <div className='ph'>
+                <Line height="50" data={sugarTemperatureChart?.data} options={sugarTemperatureChart?.options} />
+              </>
+            )}
+          </div>
+          <div className='ph'>
           {!isEmpty(sugarData) && !isEmpty(sugarPHChart?.data) && (
-            <>
+              <>
               {!isEmpty(sugarData) && sugarData?.length > 0 && <h4>{sugarData?.[sugarData?.length - 1].ph} pH<p class="fs-6 fst-italic fw-bold fs-3">pH Level</p></h4>}
-              <Line height="50" data={sugarPHChart?.data} options={sugarPHChart?.options} />
-            </>
-          )}
-        </div>
+                <Line height="50" data={sugarPHChart?.data} options={sugarPHChart?.options} />
+              </>
+            )}
+          </div>
       </div>
     </div>
   );
