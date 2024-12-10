@@ -38,7 +38,7 @@ const Dashboard = () => {
   const vinegarData = useSelector(vinegar);
   const wineData = useSelector(wine);
 
-  const [limit, setLimit] = useState(20);
+  const [limit, setLimit] = useState(30);
 
   const [temperatureChart, setTemperatureChart] = useState({
     data: {},
